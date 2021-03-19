@@ -1,3 +1,6 @@
+// https://www.javainuse.com/java/circular_java
+// https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/util/Queue.html#add(E)
+
 import java.util.Arrays;
 import java.util.concurrent.Semaphore;
 
@@ -5,12 +8,16 @@ public class circularQueue<E> {
 
     private int currentSize; //Current Circular Queue Size
     private E[] circularQueueElements;
-    private int maxSize; //Circular Queue maximum size
+    private int maxSize; //Circular Queue maximum size // this is a default value
 
     private int tail;//rear position of Circular queue(new element enqueued at rear).
     private int head; //front position of Circular queue(element will be dequeued from front).
     
     private Semaphore sem = new Semaphore(1);
+
+    public circularQueue(){
+        this(16);
+    }
 
     public circularQueue(int maxSize){
         this.maxSize = maxSize;
@@ -125,6 +132,10 @@ public class circularQueue<E> {
 
     public int getMaxSize() {
         return maxSize;
+    }
+
+    public void cleanup(){
+        // destory semphore and deallocate memory !!!
     }
 
     @Override
