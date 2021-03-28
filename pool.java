@@ -3,21 +3,17 @@ import java.util.Arrays;
 public class pool {
     private worker[]        workers;
     private ServeWebRequest s;
-    private circularQueue   buffer;
+    private ThreadSafeCircularQueue<request>   buffer;
     
-    public pool(circularQueue buffer, ServeWebRequest s){
-        this(2, buffer, s);
-    }
-
-    public pool(int npools, circularQueue buffer, ServeWebRequest s){
+    public pool(int nworkers, ServeWebRequest s, ThreadSafeCircularQueue<request>  buffer){
         this.buffer = buffer;
         this.s      = s;
-        workers     = new worker[npools]; // initlze worker array with size npool
+        workers     = new worker[nworkers]; // initlze worker array with size npool
 
         // making worker threads 
         // set it name 
         // then start it
-        for (int i = 0; i < npools; i++) {
+        for (int i = 0; i < nworkers; i++) {
             workers[i] = new worker(this.buffer, this.s);
             workers[i].setName(Integer.toString(i+1));
             workers[i].start();
@@ -34,7 +30,7 @@ public class pool {
         }   
     }
 
-
+    // not used
     public void threads_states(){
         for (int i = 0; i < workers.length; i++) {
             System.out.println(workers[i].getState());

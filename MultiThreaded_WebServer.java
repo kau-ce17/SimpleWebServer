@@ -34,7 +34,10 @@ public class MultiThreaded_WebServer{
     static  String overload_policy = "BLCK";  
 
     // Circular Queue (request data structure)
-    private static circularQueue<request> buffer;
+    private static ThreadSafeCircularQueue<request> buffer;
+
+	// Monitior Thread
+	private static monitor Mointor;
 
 	// this will give the user a way of changing some paramters 
 	// it will be executed if there are not given paramter
@@ -101,6 +104,7 @@ public class MultiThreaded_WebServer{
 
 				case 5:
 					System.out.println("Starting Server");
+					Start = true;
 				break;
 
 				default:
@@ -110,31 +114,51 @@ public class MultiThreaded_WebServer{
 		input.close();
     }
 
-	public void clean_up(){
+	public static void Paramter_extrator(String[] args){
+		if (args.length > 4){
+			System.out.println("paramter is more than for 4");
+			System.exit(0);
+		}
+		else if (args.length ==4){
+			PORT            = Integer.parseInt(args[0]);
+			pool_size       = Integer.parseInt(args[1]); 
+			buffer_size     = Integer.parseInt(args[2]);
+			overload_policy = args[3];  
+		}
+		else if(args.length ==3){
+			PORT            = Integer.parseInt(args[0]);
+			pool_size       = Integer.parseInt(args[1]); 
+			buffer_size     = Integer.parseInt(args[2]);
 
+		}
+		else if(args.length ==2){
+			PORT            = Integer.parseInt(args[0]);
+			pool_size       = Integer.parseInt(args[1]); 
+
+		}
+		else if(args.length ==1){
+			PORT            = Integer.parseInt(args[0]);
+		}
+		else{
+			interactive_console();
+		}
 	}
-
 
 	public static void main(String[] args) {
 		try {
-
-            if (args.length == 0){ // cold be 1
-                interactive_console();
-            }
-
+			Paramter_extrator(args);
 			// create a server listening socket
 			ServerSocket serverConnect = new ServerSocket(PORT);
 			System.out.println("Server started.\nListening for connections on port : " + PORT + " ...\n");
             
 			// create one instance of the required task
 			ServeWebRequest s = new ServeWebRequest();
-
+			
+			
             // create one instance of circularQueue with size using args
-            if (args.length >= 3){ // check args condition pleease
-                buffer = new circularQueue<request>(Integer.parseInt(args[3]));
-            } else {
-                buffer = new circularQueue<request>(buffer_size);
-            }
+			buffer  = new ThreadSafeCircularQueue<request>(buffer_size, overload_policy);
+			Mointor = new monitor(pool_size, s, buffer); 
+			Mointor.start();
 
 			// listen until user halts server execution
 			while (true) {
@@ -143,8 +167,13 @@ public class MultiThreaded_WebServer{
 				count++;
 				
 				// make rquest object and add it to buffer
-				request my_request = new request(connect, count);
-				buffer.add(my_request);
+				try{
+					buffer.enqueue(new request(connect, count));
+				}
+				catch (InterruptedException e){
+					System.out.println("Main thread throws exception in buffer.enqueue");
+				}
+				
                 
 				if (verbose) {
 					System.out.println("Connecton " + count + " opened. (" + new Date() + ")");

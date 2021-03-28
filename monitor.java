@@ -1,6 +1,6 @@
 public class monitor extends Thread{
     private ServeWebRequest s;
-    private circularQueue   buffer;
+    private ThreadSafeCircularQueue<request>    buffer;
     private pool            pool_of_workers;
 
     // (1) Maintain a constant number of live worker threads in the thread-pool,            (( DONE )) 
@@ -13,6 +13,7 @@ public class monitor extends Thread{
         Thread ref_moinitor_Thread = Thread.currentThread();
         Runtime.getRuntime().addShutdownHook(new Thread() {
             public void run() { 
+                System.out.println("I will cleanup then terimninate");
                 pool_of_workers.clean_up();
                 clean_up(ref_moinitor_Thread);
             }
@@ -24,13 +25,7 @@ public class monitor extends Thread{
 
     }
 
-    public monitor(ServeWebRequest s, circularQueue buffer){
-        this.s          = s;
-        this.buffer     = buffer;
-        pool_of_workers = new pool(this.s, this.buffer);
-    }
-
-    public monitor(int npools, ServeWebRequest s, circularQueue buffer){
+    public monitor(int npools, ServeWebRequest s, ThreadSafeCircularQueue<request> buffer){
         this.s          = s;
         this.buffer     = buffer;
         pool_of_workers = new pool(npools ,this.s, this.buffer);

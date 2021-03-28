@@ -8,6 +8,7 @@ public class ThreadSafeCircularQueue<E> {
 
     private E[] circularQueueElements;
     private int maxSize; //Circular Queue maximum size // this is a default value
+    private int currnetSize;
 
     private int tail;//rear position of Circular queue(new element enqueued at rear).
     private int head; //front position of Circular queue(element will be dequeued from front).
@@ -17,11 +18,6 @@ public class ThreadSafeCircularQueue<E> {
     private Semaphore mutex = new Semaphore(1); //  binary Semaphore
     private Semaphore empty; // counting semaphore inslized with avalibale elements to write in
     private Semaphore full = new Semaphore(0); // counting semaphore inslized with avalibale elements to read from
-
-    public ThreadSafeCircularQueue(){
-        this(16);
-    }
-
     
     public ThreadSafeCircularQueue(int maxSize, String policy){
         this.maxSize = maxSize;
@@ -32,12 +28,20 @@ public class ThreadSafeCircularQueue<E> {
         this.policy = policy;
     }
 
-
+    /*
+     * make write and reader write and read and the same time 
+     * excepet when tail equal head 
+     * 
+     * how !!!!
+     * by using the mutex only when tail and head eaual each other 
+     * otherways use write mutex and another reader mutex
+     */
     public void enqueue(E item) throws InterruptedException{
-
 
         empty.acquire(); //acquier one block
         mutex.acquire(); //acquire WMutex
+        this.currnetSize +=1;
+        System.out.printf("[ Writer ] %d\n", this.currnetSize);
 
         //write to the queue
         tail = (tail + 1) % circularQueueElements.length;
@@ -48,15 +52,25 @@ public class ThreadSafeCircularQueue<E> {
 
         mutex.release(); //release the Semaphore varible
         full.release();
+        
 
         
     }
 
-    
+    /*
+     * make write and reader write and read and the same time 
+     * excepet when tail equal head 
+     * 
+     * how !!!!
+     * by using the mutex only when tail and head eaual each other 
+     * otherways use write mutex and another reader mutex
+     */
     public E dequeue()  throws InterruptedException{
 
         full.acquire(); //acquier one block
         mutex.acquire();
+        this.currnetSize -=1;
+        System.out.printf("[ Reader ] %d\n",this.currnetSize);
 
         //read and remove
         E deQueuedElement;

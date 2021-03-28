@@ -15,10 +15,6 @@ public class circularQueue<E> {
     
     private Semaphore sem = new Semaphore(1);
 
-    public circularQueue(){
-        this(16);
-    }
-
     public circularQueue(int maxSize){
         this.maxSize = maxSize;
         circularQueueElements = (E[]) new Object[this.maxSize];
