@@ -2,7 +2,8 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Date;
-
+import java.util.InputMismatchException;
+import java.util.Scanner;
 /**
  * @(#)MultiThreaded_WebServer.java
  *
@@ -27,17 +28,92 @@ public class MultiThreaded_WebServer{
 	static int count = 0;
 
     // default values (take values form args if avalible)
-	static final int PORT = 8085; 
-    static final int pool_size = 8085; 
-    static final int buffer_size = 8085;
-    static final int overload_policy = 8085;  
+	static  int    PORT            = 8085; 
+    static  int    pool_size       = 5; 
+    static  int    buffer_size     = 16;
+    static  String overload_policy = "BLCK";  
 
     // Circular Queue (request data structure)
-    private static circularQueue requests;
+    private static circularQueue<request> buffer;
 
+	// this will give the user a way of changing some paramters 
+	// it will be executed if there are not given paramter
     static void interactive_console(){
-        // change defalut values
+		Scanner input = new Scanner(System.in);
+		boolean Start = false;
+		while (!Start){
+			System.out.printf("Port Number: %d\nPool Size: %d\nBuffer Size: %d\nOverlod Policy: BLCK%s\n", 
+											PORT,        pool_size,      buffer_size,        overload_policy);
+			System.out.println( "1- Change Port Number\n"    +
+								"2- Change Pool Size\n"      +
+								"3- Change Buffer Size\n"    +
+								"4- Change Overlod Policy\n" +
+								"5- Start Server\n"          +
+								"press a number: "
+			);
+			switch(input.nextInt()) {
+				case 1:
+					System.out.println("Port Number is: ");
+					try {
+						PORT = input.nextInt();
+					} catch (InputMismatchException e) {
+						System.out.println("Port Number Must be integer");						
+					}	
+				break;
+
+				case 2:
+					System.out.println("Pool Size is: ");
+					try {
+						pool_size = input.nextInt();
+					} catch (InputMismatchException e) {
+						System.out.println("Pool Size Must be integer");						
+					}	
+				break;
+
+				case 3:
+					System.out.println("Buffer Size is: ");
+					try {
+						buffer_size = input.nextInt();
+					} catch (InputMismatchException e) {
+						System.out.println("Buffer Size Must be integer");						
+					}				
+				break;
+
+				case 4:
+					System.out.println("1-Block (BLCK)\n"      +
+									   "2-Drop_tail (DRPT)\n"  +
+									   "3-Drop_head (DRPH)"
+									  );
+					switch(input.nextInt()) {
+						case 1:
+							overload_policy = "BLCK";
+						break;
+						case 2:
+							overload_policy = "DRPT";
+						break;
+						case 3:
+							overload_policy = "DRPH";
+						break;
+						default:
+							System.out.println("Wrong Number Nothing Changed!!!");
+					}
+				break;
+
+				case 5:
+					System.out.println("Starting Server");
+				break;
+
+				default:
+					System.out.println("Wrong Number Nothing Changed!!!");
+			  }
+		}
+		input.close();
     }
+
+	public void clean_up(){
+
+	}
+
 
 	public static void main(String[] args) {
 		try {
@@ -55,9 +131,9 @@ public class MultiThreaded_WebServer{
 
             // create one instance of circularQueue with size using args
             if (args.length >= 3){ // check args condition pleease
-                requests = new circularQueue<request>(Integer.parseInt(args[3]));
+                buffer = new circularQueue<request>(Integer.parseInt(args[3]));
             } else {
-                requests = new circularQueue<request>();
+                buffer = new circularQueue<request>(buffer_size);
             }
 
 			// listen until user halts server execution
@@ -65,6 +141,10 @@ public class MultiThreaded_WebServer{
 				// accept client connection request
 				connect = serverConnect.accept();
 				count++;
+				
+				// make rquest object and add it to buffer
+				request my_request = new request(connect, count);
+				buffer.add(my_request);
                 
 				if (verbose) {
 					System.out.println("Connecton " + count + " opened. (" + new Date() + ")");
