@@ -1,7 +1,6 @@
  // https://www.javainuse.com/java/circular_java
 // https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/util/Queue.html#add(E)
 
-import java.util.Arrays;
 import java.util.concurrent.Semaphore;
  
 public class ThreadSafeCircularQueue<E> {
@@ -40,8 +39,8 @@ public class ThreadSafeCircularQueue<E> {
 
         empty.acquire(); //acquier one block
         mutex.acquire(); //acquire WMutex
-        this.currnetSize +=1;
-        System.out.printf("[ Writer ] %d\n", this.currnetSize);
+        this.currnetSize +=1; // for debuging
+        System.out.printf("[ Writer ] %d\n", this.currnetSize); // for debuging
 
         //write to the queue
         tail = (tail + 1) % circularQueueElements.length;
@@ -69,8 +68,8 @@ public class ThreadSafeCircularQueue<E> {
 
         full.acquire(); //acquier one block
         mutex.acquire();
-        this.currnetSize -=1;
-        System.out.printf("[ Reader ] %d\n",this.currnetSize);
+        this.currnetSize -=1; // for debuging
+        System.out.printf("[ Reader ] %d\n",this.currnetSize); // for debuging
 
         //read and remove
         E deQueuedElement;
@@ -91,6 +90,7 @@ public class ThreadSafeCircularQueue<E> {
 
     public void cleanup(){
         // destory mutexphore and deallocate memory !!!
+        // same as LAB 10
     }
 
     public void printAll(){

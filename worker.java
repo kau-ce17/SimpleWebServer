@@ -1,7 +1,7 @@
 public class worker extends Thread{
     private ThreadSafeCircularQueue<request>   buffer;
-    private ServeWebRequest s;
-    private request         r;
+    private ServeWebRequest                    s;
+    private request                            r;
 
     public void run(){
         try{

@@ -1,9 +1,10 @@
 import java.util.Arrays;
 
 public class pool {
-    private worker[]        workers;
-    private ServeWebRequest s;
     private ThreadSafeCircularQueue<request>   buffer;
+    private ServeWebRequest                    s;
+    private worker[]                           workers;
+    
     
     public pool(int nworkers, ServeWebRequest s, ThreadSafeCircularQueue<request>  buffer){
         this.buffer = buffer;
@@ -15,7 +16,7 @@ public class pool {
         // then start it
         for (int i = 0; i < nworkers; i++) {
             workers[i] = new worker(this.buffer, this.s);
-            workers[i].setName(Integer.toString(i+1));
+            workers[i].setName(String.format("[ worker %d ]",i+1));
             workers[i].start();
         }
     }
@@ -24,7 +25,7 @@ public class pool {
         for (int i = 0; i < workers.length; i++) {
             if (workers[i].getState() == Thread.State.TERMINATED) { // we might need to cheack for other states
                 workers[i] = new worker(this.buffer, this.s);
-                workers[i].setName(Integer.toString(i+1));
+                workers[i].setName(String.format("[ worker %d ]",i+1));
                 workers[i].start();
             }
         }   

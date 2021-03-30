@@ -1,4 +1,6 @@
+import java.io.File;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Date;
@@ -41,7 +43,7 @@ public class MultiThreaded_WebServer{
 
 	// this will give the user a way of changing some paramters 
 	// it will be executed if there are not given paramter
-    static void interactive_console(){
+    public static void interactive_console(){
 		Scanner input = new Scanner(System.in);
 		boolean Start = false;
 		while (!Start){
@@ -54,6 +56,7 @@ public class MultiThreaded_WebServer{
 								"5- Start Server\n"          +
 								"press a number: "
 			);
+
 			switch(input.nextInt()) {
 				case 1:
 					System.out.println("Port Number is: ");
@@ -146,7 +149,12 @@ public class MultiThreaded_WebServer{
 
 	public static void main(String[] args) {
 		try {
+			
+			PrintStream log_file = new PrintStream(new File("web-server-log.txt")); // PrintStrea is sync
+            System.setOut(log_file); // this might generate race conditiin 
+
 			Paramter_extrator(args);
+
 			// create a server listening socket
 			ServerSocket serverConnect = new ServerSocket(PORT);
 			System.out.println("Server started.\nListening for connections on port : " + PORT + " ...\n");
