@@ -149,12 +149,11 @@ public class MultiThreaded_WebServer{
 
 	public static void main(String[] args) {
 		try {
-			
-			PrintStream log_file = new PrintStream(new File("web-server-log.txt")); // PrintStrea is sync
-            System.setOut(log_file); // this might generate race conditiin 
-
 			Paramter_extrator(args);
 
+			PrintStream log_file = new PrintStream(new File("web-server-log.txt")); // PrintStrea is sync
+            System.setOut(log_file); // this might generate race conditiin 
+			
 			// create a server listening socket
 			ServerSocket serverConnect = new ServerSocket(PORT);
 			System.out.println("Server started.\nListening for connections on port : " + PORT + " ...\n");
