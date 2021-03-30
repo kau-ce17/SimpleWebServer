@@ -1,8 +1,9 @@
 import java.net.Socket;
+
 public class request{
     
     private Socket socket;
-    private int count;
+    private int    count;
 
     public request(Socket s, int count){
         this.socket = s;
