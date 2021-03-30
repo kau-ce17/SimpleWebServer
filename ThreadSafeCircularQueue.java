@@ -55,7 +55,6 @@ public class ThreadSafeCircularQueue<E> {
 
         
     }
-
     /*
      * make write and reader write and read and the same time 
      * excepet when tail equal head 
