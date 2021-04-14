@@ -31,9 +31,9 @@ public class MultiThreaded_WebServer{
 
     // default values (take values form args if avalible)
 	static  int    PORT            = 8085; 
-    static  int    pool_size       = 5; 
-    static  int    buffer_size     = 16;
-    static  String overload_policy = "BLCK";  
+    static  int    pool_size       = 2; 
+    static  int    buffer_size     = 4;
+    static  String overload_policy = "DRPH";  
 
     // Circular Queue (request data structure)
     private static ThreadSafeCircularQueue<request> buffer;
@@ -47,7 +47,7 @@ public class MultiThreaded_WebServer{
 		Scanner input = new Scanner(System.in);
 		boolean Start = false;
 		while (!Start){
-			System.out.printf("Port Number: %d\nPool Size: %d\nBuffer Size: %d\nOverlod Policy: BLCK%s\n", 
+			System.out.printf("Port Number: %d\nPool Size: %d\nBuffer Size: %d\nOverlod Policy: %s\n", 
 											PORT,        pool_size,      buffer_size,        overload_policy);
 			System.out.println( "1- Change Port Number\n"    +
 								"2- Change Pool Size\n"      +

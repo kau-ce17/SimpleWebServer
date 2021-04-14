@@ -38,19 +38,24 @@ public class ThreadSafeCircularQueue<E> {
      */
     public boolean enqueue(E item) throws InterruptedException{
 
+        printAll();
         if(!(empty.tryAcquire())){
 
             if(policy.equals("BLCK")){
+                System.out.println("[ block policy ]");
                 empty.acquire();
             }
             else if(policy.equals("DRPT")){
+                System.out.println("[ Drop tail policy ]");
                 return false;
             }
             else if(policy.equals("DRPH")){
+                System.out.println("[ Drop head policy ]");
                 this.dropHead(item);
             }
 
         }
+        printAll();
         // empty.acquire(); //acquier one block
 
         mutex.acquire(); //acquire WMutex
@@ -102,7 +107,7 @@ public class ThreadSafeCircularQueue<E> {
      * that is not currently being processed by a thread (this is the request in the front of the queue), 
      * and add the new request to the end of the queue.
      */
-    public void dropHead(E item){
+    public void dropHead(E item) throws InterruptedException{
         
         if(!(full.tryAcquire())){
             return;
@@ -112,9 +117,12 @@ public class ThreadSafeCircularQueue<E> {
         
         System.out.printf("[ Drop Head ] %d\n",this.currnetSize); // for debuging
 
+        
         //remove
         circularQueueElements[head] = null;
         head = (head + 1) % circularQueueElements.length;
+        printAll();
+
 
         //add
         tail = (tail + 1) % circularQueueElements.length;
@@ -122,6 +130,7 @@ public class ThreadSafeCircularQueue<E> {
         if (head == -1) {
             head = tail;
         }
+        printAll();
 
         mutex.release();
 
@@ -139,11 +148,12 @@ public class ThreadSafeCircularQueue<E> {
     }
 
     public void printAll(){
-
+        System.out.println("[ this our queue ]");
         for(int i=0; i<maxSize;i++){
             System.out.println(circularQueueElements[i]);
         }
 
+        System.out.println("[ end of queue ]");
     }
 
 }
