@@ -175,9 +175,10 @@ public class MultiThreaded_WebServer{
 				
 				// make rquest object and add it to buffer
 				try{
-					if(!(buffer.enqueue(new request(connect, count)))){
+					request req = buffer.enqueue(new request(connect, count));
+					if( req != null){
 						//TODO: report in the log file
-						s.refuse(connect,count); //for Drop_tail (DRPT) policy, the two other polcies implmented inside the queue
+						s.refuse(req.get_Socket(),req.get_request_number()); //for Drop_tail (DRPT) policy, the two other polcies implmented inside the queue
 					}
 				}
 				catch (InterruptedException e){

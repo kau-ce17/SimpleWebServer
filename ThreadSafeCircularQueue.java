@@ -36,7 +36,7 @@ public class ThreadSafeCircularQueue<E> {
      * otherways use write mutex and another reader mutex
      * 
      */
-    public boolean enqueue(E item) throws InterruptedException{
+    public E enqueue(E item) throws InterruptedException{
 
         printAll();
         if(!(empty.tryAcquire())){
@@ -47,15 +47,20 @@ public class ThreadSafeCircularQueue<E> {
             }
             else if(policy.equals("DRPT")){
                 System.out.println("[ Drop tail policy ]");
-                return false;
+                return item;
             }
             else if(policy.equals("DRPH")){
                 System.out.println("[ Drop head policy ]");
-                this.dropHead(item);
+                E drped_item = this.dropHead(item);
+                if(drped_item != null){
+                    return drped_item;
+                }
+                System.out.println("catchy");
             }
 
         }
-        printAll();
+        
+        // printAll();
         // empty.acquire(); //acquier one block
 
         mutex.acquire(); //acquire WMutex
@@ -72,7 +77,7 @@ public class ThreadSafeCircularQueue<E> {
         mutex.release(); //release the Semaphore varible
         full.release();
         
-        return true;
+        return null;
         
     }
     /** 
@@ -107,20 +112,22 @@ public class ThreadSafeCircularQueue<E> {
      * that is not currently being processed by a thread (this is the request in the front of the queue), 
      * and add the new request to the end of the queue.
      */
-    public void dropHead(E item) throws InterruptedException{
+    public E dropHead(E item) throws InterruptedException{
         
-        if(!(full.tryAcquire())){
-            return;
-        } //acquier one block
-
+       if(!(full.tryAcquire())){
+           return null;
+       }
+       E droped_req;
         mutex.acquire();
-        
+    
         System.out.printf("[ Drop Head ] %d\n",this.currnetSize); // for debuging
 
         
         //remove
+        droped_req = circularQueueElements[head];
         circularQueueElements[head] = null;
         head = (head + 1) % circularQueueElements.length;
+
         printAll();
 
 
@@ -131,10 +138,11 @@ public class ThreadSafeCircularQueue<E> {
             head = tail;
         }
         printAll();
-
+        
         mutex.release();
+        full.release();
 
-
+        return droped_req;
     }
 
 
