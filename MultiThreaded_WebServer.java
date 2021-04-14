@@ -163,7 +163,7 @@ public class MultiThreaded_WebServer{
 			
 			
             // create one instance of circularQueue with size using args
-			buffer  = new ThreadSafeCircularQueue<request>(buffer_size, overload_policy);
+			buffer  = new ThreadSafeCircularQueue<request>(buffer_size, overload_policy, s);
 			Mointor = new monitor(pool_size, s, buffer); 
 			Mointor.start();
 
@@ -175,7 +175,10 @@ public class MultiThreaded_WebServer{
 				
 				// make rquest object and add it to buffer
 				try{
-					buffer.enqueue(new request(connect, count));
+					if(!(buffer.enqueue(new request(connect, count)))){
+						//TODO: report in the log file
+						s.refuse(connect,count); //for Drop_tail (DRPT) policy, the two other polcies implmented inside the queue
+					}
 				}
 				catch (InterruptedException e){
 					System.out.println("Main thread throws exception in buffer.enqueue");
