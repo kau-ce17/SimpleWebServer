@@ -33,7 +33,7 @@ public class MultiThreaded_WebServer{
 	static  int    PORT            = 8085; 
     static  int    pool_size       = 2; 
     static  int    buffer_size     = 4;
-    static  String overload_policy = "DRPH";  
+    static  String overload_policy = "BLCK";  
 
     // Circular Queue (request data structure)
     private static ThreadSafeCircularQueue<request> buffer;
