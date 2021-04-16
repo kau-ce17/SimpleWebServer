@@ -182,7 +182,7 @@ public class MultiThreaded_WebServer{
 				try{
 					request req = buffer.enqueue(new request(connect, count));
 					if( req != null){
-						System.out.printf("[Server] The folling request number has been refused: %d",req.get_request_number());
+						System.out.printf("[Server] The following request number has been refused: %d\n",req.get_request_number());
 						s.refuse(req.get_Socket(),req.get_request_number()); //For Drop_tail (DRPT) policy, the two other polcies implmented inside the queue
 					}
 				}
