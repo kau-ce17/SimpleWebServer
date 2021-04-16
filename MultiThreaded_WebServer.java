@@ -88,7 +88,8 @@ public class MultiThreaded_WebServer{
 				case 4:
 					System.out.println("1-Block (BLCK)\n"      +
 									   "2-Drop_tail (DRPT)\n"  +
-									   "3-Drop_head (DRPH)"
+									   "3-Drop_head (DRPH)\n" +
+									   "Pick an option from 1 to 3:"
 									  );
 					switch(input.nextInt()) {
 						case 1:

@@ -16,6 +16,7 @@ public class monitor extends Thread{
             public void run() { 
                 System.out.println("I will cleanup then terimninate");
                 pool_of_workers.clean_up();
+                buffer.cleanup();
                 clean_up(ref_moinitor_Thread);
                 // main thread not cleaned take the reference for it then clean up(call a method in main thread)
                 // clean up buffer and destroy semphores (lab 10)
@@ -36,7 +37,7 @@ public class monitor extends Thread{
 
     public void clean_up(Thread ref_moinitor_Thread){
         this.s               = null;
-        this.buffer          = null;
+        this.buffer = null;
         this.pool_of_workers = null;
         ref_moinitor_Thread.interrupt();
     }

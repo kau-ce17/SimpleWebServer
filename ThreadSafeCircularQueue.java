@@ -1,4 +1,4 @@
- // https://www.javainuse.com/java/circular_java
+// https://www.javainuse.com/java/circular_java
 // https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/util/Queue.html#add(E)
 
 import java.util.concurrent.Semaphore;
@@ -151,8 +151,10 @@ public class ThreadSafeCircularQueue<E> {
     }
 
     public void cleanup(){
-        // destory mutexphore and deallocate memory !!!
-        // same as LAB 10
+        circularQueueElements = null;
+        mutex = null;
+        empty = null;
+        full = null;
     }
 
     public void printAll(){
