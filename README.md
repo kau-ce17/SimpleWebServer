@@ -7,7 +7,7 @@ This is a multi threaded web server that handle multiple requests. It is build i
 
 ## Authors
 * Mohammed Alsaggaf
-* Ahmad Alzbadi
+* Ahmad Alzbidi
 * Khalid Saqi
 
 ## Design Requirments and Specifications
