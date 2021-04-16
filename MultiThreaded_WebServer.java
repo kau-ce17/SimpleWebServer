@@ -41,8 +41,10 @@ public class MultiThreaded_WebServer{
 	// Monitior Thread
 	private static monitor Mointor;
 
-	// this will give the user a way of changing some paramters 
-	// it will be executed if there are not given paramter
+	/** 
+	* This will give the user a way of changing some paramters.
+	* It will be executed if there are not given paramter.
+	*/
     public static void interactive_console(){
 		Scanner input = new Scanner(System.in);
 		boolean Start = false;
@@ -119,7 +121,7 @@ public class MultiThreaded_WebServer{
 
 	public static void Paramter_extrator(String[] args){
 		if (args.length > 4){
-			System.out.println("paramter is more than for 4");
+			System.out.println("Paramter is more than 4");
 			System.exit(0);
 		}
 		else if (args.length ==4){
@@ -151,34 +153,36 @@ public class MultiThreaded_WebServer{
 		try {
 			Paramter_extrator(args);
 
-			PrintStream log_file = new PrintStream(new File("web-server-log.txt")); // PrintStrea is sync
-            System.setOut(log_file); // this might generate race conditiin 
+			//Record all the server activity output on a Log File 
+			PrintStream log_file = new PrintStream(new File("web-server-log.txt")); //===================================
+            System.setOut(log_file);  
 			
-			// create a server listening socket
+			// Create a server listening socket
 			ServerSocket serverConnect = new ServerSocket(PORT);
 			System.out.println("Server started.\nListening for connections on port : " + PORT + " ...\n");
             
-			// create one instance of the required task
+			// Create one instance of the required task
 			ServeWebRequest s = new ServeWebRequest();
 			
 			
-            // create one instance of circularQueue with size using args
+            // Create one instance of circularQueue with size using args
 			buffer  = new ThreadSafeCircularQueue<request>(buffer_size, overload_policy);
 			Mointor = new monitor(pool_size, s, buffer); 
 			Mointor.start();
 
-			// listen until user halts server execution
+			// Listen until user halts server execution
 			while (true) {
-				// accept client connection request
+
+				// Accept client connection request
 				connect = serverConnect.accept();
 				count++;
 				
-				// make rquest object and add it to buffer
+				// Make rquest object and add it to buffer
 				try{
 					request req = buffer.enqueue(new request(connect, count));
 					if( req != null){
 						//TODO: report in the log file
-						s.refuse(req.get_Socket(),req.get_request_number()); //for Drop_tail (DRPT) policy, the two other polcies implmented inside the queue
+						s.refuse(req.get_Socket(),req.get_request_number()); //For Drop_tail (DRPT) policy, the two other polcies implmented inside the queue
 					}
 				}
 				catch (InterruptedException e){
