@@ -9,14 +9,14 @@ import java.util.Scanner;
 /**
  * @(#)MultiThreaded_WebServer.java
  *
- * @author Adapted from SSaurel's Blog
- * by Dr. Abdulghani M. Al-Qasimi
- * @version 1.00 2020/8/7
+ * @author Team BG01 {1651491: Ahmed Alzbidi, 1741869: Mohammed Alsaggaf, 1740489: Khalid Saqi}
+ * 
+ * @version 1.00 2021/4/16
  *
- * This is a simple web server for teaching purposes.
- * It works as a single threaded application, where,
- * while a client request is being served, other clients
- * will have to wait until that request is finished.
+ * This is a multi threaded web server that handle multiple requests. It is build in java using semaphore as synchronization tool. 
+ * The design components consist of a main thread, worker threads to serve the requests, 
+ * thread pool to maintain the workers and a monitor thread to handle the abnormal condetions and manitain the number of live threads.
+ *
  */
 public class MultiThreaded_WebServer{
 
@@ -31,9 +31,9 @@ public class MultiThreaded_WebServer{
 
     // default values (take values form args if avalible)
 	static  int    PORT            = 8085; 
-    static  int    pool_size       = 2; 
-    static  int    buffer_size     = 4;
-    static  String overload_policy = "DRPH";  
+    static  int    pool_size       = Runtime.getRuntime().availableProcessors(); 
+    static  int    buffer_size     = 10;
+    static  String overload_policy = "BLCK";  
 
     // Circular Queue (request data structure)
     private static ThreadSafeCircularQueue<request> buffer;
@@ -41,8 +41,10 @@ public class MultiThreaded_WebServer{
 	// Monitior Thread
 	private static monitor Mointor;
 
-	// this will give the user a way of changing some paramters 
-	// it will be executed if there are not given paramter
+	/** 
+	* This will give the user a way of changing some paramters.
+	* It will be executed if there are not given paramter.
+	*/
     public static void interactive_console(){
 		Scanner input = new Scanner(System.in);
 		boolean Start = false;
@@ -107,7 +109,7 @@ public class MultiThreaded_WebServer{
 				break;
 
 				case 5:
-					System.out.println("Starting Server");
+					System.out.println("Server Started......");
 					Start = true;
 				break;
 
@@ -120,7 +122,7 @@ public class MultiThreaded_WebServer{
 
 	public static void Paramter_extrator(String[] args){
 		if (args.length > 4){
-			System.out.println("paramter is more than for 4");
+			System.out.println("Paramter is more than 4");
 			System.exit(0);
 		}
 		else if (args.length ==4){
@@ -152,34 +154,36 @@ public class MultiThreaded_WebServer{
 		try {
 			Paramter_extrator(args);
 
-			PrintStream log_file = new PrintStream(new File("web-server-log.txt")); // PrintStrea is sync
-            System.setOut(log_file); // this might generate race conditiin 
+			//Record all the server activity output on a Log File 
+			PrintStream log_file = new PrintStream(new File("web-server-log.txt")); //===================================
+            System.setOut(log_file);  
 			
-			// create a server listening socket
+			// Create a server listening socket
 			ServerSocket serverConnect = new ServerSocket(PORT);
 			System.out.println("Server started.\nListening for connections on port : " + PORT + " ...\n");
             
-			// create one instance of the required task
+			// Create one instance of the required task
 			ServeWebRequest s = new ServeWebRequest();
 			
 			
-            // create one instance of circularQueue with size using args
+            // Create one instance of circularQueue with size using args
 			buffer  = new ThreadSafeCircularQueue<request>(buffer_size, overload_policy);
 			Mointor = new monitor(pool_size, s, buffer); 
 			Mointor.start();
 
-			// listen until user halts server execution
+			// Listen until user halts server execution
 			while (true) {
-				// accept client connection request
+
+				// Accept client connection request
 				connect = serverConnect.accept();
 				count++;
 				
-				// make rquest object and add it to buffer
+				// Make rquest object and add it to buffer
 				try{
 					request req = buffer.enqueue(new request(connect, count));
 					if( req != null){
-						//TODO: report in the log file
-						s.refuse(req.get_Socket(),req.get_request_number()); //for Drop_tail (DRPT) policy, the two other polcies implmented inside the queue
+						System.out.printf("[Server] The folling request number has been refused: %d",req.get_request_number());
+						s.refuse(req.get_Socket(),req.get_request_number()); //For Drop_tail (DRPT) policy, the two other polcies implmented inside the queue
 					}
 				}
 				catch (InterruptedException e){
