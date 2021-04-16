@@ -1,5 +1,5 @@
 # The name of the class containing the "main" routine
-MAINCLASS=SimpleWebServer
+MAINCLASS=MultiThreaded_WebServer
 
 CLASSPATH=.:webserve.jar
 

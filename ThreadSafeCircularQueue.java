@@ -3,21 +3,10 @@
 
 import java.util.concurrent.Semaphore;
  
-/**
- * @(#)ThreadSafeCircularQueue.java 
- * 
- * @author Team BG01 {1651491: Ahmed Alzbidi, 1741869: Mohammed Alsaggaf, 1740489: Khalid Saqi}
- * 
- * @version 1.00 15/4/2021
- * 
- * This is a Circular Queue that provides a good environment
- * for store the User's requests.
- */
-
 public class ThreadSafeCircularQueue<E> {
 
     private E[] circularQueueElements;
-    private int maxSize; //Circular Queue maximum size. This is a default value
+    private int maxSize; //Circular Queue maximum size // this is a default value
     private int currnetSize;
 
     private int tail;//rear position of Circular queue(new element enqueued at rear).
@@ -30,7 +19,6 @@ public class ThreadSafeCircularQueue<E> {
     private Semaphore full = new Semaphore(0); // counting semaphore inslized with avalibale elements to read from
     
 
-    //Start the queue
     public ThreadSafeCircularQueue(int maxSize, String policy){
         this.maxSize = maxSize;
         circularQueueElements = (E[]) new Object[this.maxSize];
@@ -40,62 +28,74 @@ public class ThreadSafeCircularQueue<E> {
         this.policy = policy;
     }
 
-   // Add the request into queue
+    /** make write and reader write and read and the same time 
+     * excepet when tail equal head 
+     * 
+     * how !!!!
+     * by using the mutex only when tail and head eaual each other 
+     * otherways use write mutex and another reader mutex
+     * 
+     */
     public E enqueue(E item) throws InterruptedException{
 
-
-        //Hnadling overloding policies by cheking the queue state either full or empty
+        printAll();
         if(!(empty.tryAcquire())){
 
-            //Block policy (Default) //===================================
             if(policy.equals("BLCK")){
-                System.out.println("[ Block Policy Activated! ]");
+                System.out.println("[ block policy ]");
                 empty.acquire();
             }
-            //Drop tail policy
             else if(policy.equals("DRPT")){
-                System.out.println("[ Drop Tail Policy Activated! ]");
+                System.out.println("[ Drop tail policy ]");
                 return item;
             }
-            //Drop head policy
             else if(policy.equals("DRPH")){
-                System.out.println("[ Drop Head Policy Activated! ]");
+                System.out.println("[ Drop head policy ]");
                 E drped_item = this.dropHead(item);
                 if(drped_item != null){
                     return drped_item;
                 }
+                System.out.println("catchy");
             }
 
         }
         
-        mutex.acquire(); //Acquire Mutex
-        this.currnetSize +=1; // For debuging
-        // System.out.printf("[ Writer ] %d\n", this.currnetSize); // For debuging
+        // printAll();
+        // empty.acquire(); //acquier one block
 
-        //Write to the queue
+        mutex.acquire(); //acquire WMutex
+        this.currnetSize +=1; // for debuging
+        System.out.printf("[ Writer ] %d\n", this.currnetSize); // for debuging
+
+        //write to the queue
         tail = (tail + 1) % circularQueueElements.length;
         circularQueueElements[tail] = item;
         if (head == -1) {
             head = tail;
         }
 
-        mutex.release(); //Release the Semaphore varible
+        mutex.release(); //release the Semaphore varible
         full.release();
-        printAll();
-
+        
         return null;
         
     }
-
-    // Remove the request from the queue
+    /** 
+     * make write and reader write and read and the same time 
+     * excepet when tail equal head 
+     * 
+     * how !!!!
+     * by using the mutex only when tail and head eaual each other 
+     * otherways use write mutex and another reader mutex
+     */
     public E dequeue()  throws InterruptedException{
 
-        full.acquire(); //Acquier one block
+        full.acquire(); //acquier one block
         mutex.acquire();
-        this.currnetSize -=1; // For debuging
-        // System.out.printf("[ Reader ] %d\n",this.currnetSize); // for debuging
+        this.currnetSize -=1; // for debuging
+        System.out.printf("[ Reader ] %d\n",this.currnetSize); // for debuging
 
-        //Read and remove
+        //read and remove
         E deQueuedElement;
         deQueuedElement = circularQueueElements[head];
         circularQueueElements[head] = null;
@@ -113,33 +113,30 @@ public class ThreadSafeCircularQueue<E> {
      * and add the new request to the end of the queue.
      */
     public E dropHead(E item) throws InterruptedException{
-       
-        // Checking the queue if it STILL full or not //===================================
+        
        if(!(full.tryAcquire())){
            return null;
        }
        E droped_req;
         mutex.acquire();
     
-        // System.out.printf("[ Drop Head ] %d\n",this.currnetSize); // for debuging
-       System.out.println("\n ↓ The queue BEFORE removing the oldest request ↓");
-        printAll();
+        System.out.printf("[ Drop Head ] %d\n",this.currnetSize); // for debuging
 
-        //Remove oldest request from the queue
+        
+        //remove
         droped_req = circularQueueElements[head];
         circularQueueElements[head] = null;
         head = (head + 1) % circularQueueElements.length;
 
-        System.out.println("↓ The queue AFTER removing the oldest request ↓");
         printAll();
-        
-        //Add the request
+
+
+        //add
         tail = (tail + 1) % circularQueueElements.length;
         circularQueueElements[tail] = item;
         if (head == -1) {
             head = tail;
         }
-        System.out.println("↓ The queue after adding the NEWEST request ↓");
         printAll();
         
         mutex.release();
@@ -148,25 +145,23 @@ public class ThreadSafeCircularQueue<E> {
         return droped_req;
     }
 
-    // Return the maximum size of the queue
+
     public int getMaxSize() {
         return maxSize;
     }
-    // Destory semaphore mutex and deallocate memory
+
     public void cleanup(){
-    circularQueueElements = null;
-    mutex = null;
-    empty = null;
-    full = null;
+        // destory mutexphore and deallocate memory !!!
+        // same as LAB 10
     }
-    // Visualize the content of the queue (requests)
+
     public void printAll(){
-        System.out.println("\n[ The beginning of the queue ]\n");
+        System.out.println("[ this our queue ]");
         for(int i=0; i<maxSize;i++){
             System.out.println(circularQueueElements[i]);
         }
 
-        System.out.println("\n[ The end of the queue ]\n");
+        System.out.println("[ end of queue ]");
     }
 
 }
