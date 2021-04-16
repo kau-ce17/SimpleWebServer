@@ -24,8 +24,9 @@ public class worker extends Thread{
         catch(InterruptedException e){
             System.out.println("Worker thorws an exception"+Thread.currentThread().getName());
         }
-        clean_up();
+        
         System.out.println("Thread "+ Thread.currentThread().getName() + " has been stoped");
+        clean_up();
     }
     /**
      * 

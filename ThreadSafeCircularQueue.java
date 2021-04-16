@@ -1,4 +1,3 @@
-// https://www.javainuse.com/java/circular_java
 // https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/util/Queue.html#add(E)
 
 import java.util.concurrent.Semaphore;
@@ -28,7 +27,7 @@ public class ThreadSafeCircularQueue<E> {
     private Semaphore mutex = new Semaphore(1); //  binary Semaphore
     private Semaphore empty; // counting semaphore inslized with avalibale elements to write in
     private Semaphore full = new Semaphore(0); // counting semaphore inslized with avalibale elements to read from
-    
+    private ServeWebRequest s;
 
     /**
      * 
@@ -37,13 +36,14 @@ public class ThreadSafeCircularQueue<E> {
      * @param maxSize
      * @param policy
      */
-    public ThreadSafeCircularQueue(int maxSize, String policy){
+    public ThreadSafeCircularQueue(int maxSize, String policy, ServeWebRequest s){
         this.maxSize = maxSize;
         circularQueueElements = (E[]) new Object[this.maxSize];
         empty = new Semaphore(this.maxSize); // counting semaphore inslized with avalibale elements to read from
         tail = -1;
         head = -1;
         this.policy = policy;
+        this.s = s;
     }
 
     /**
@@ -204,15 +204,29 @@ public class ThreadSafeCircularQueue<E> {
         return maxSize;
     }
     
-    
     /**
      *  Destory semaphore mutex and deallocate memory
      */
     public void cleanup(){
+        
+        if(head > -1){
+            request item = (request)circularQueueElements[head];
+
+            while(item != null){
+                
+                s.refuse(item.get_Socket(),item.get_request_number());
+
+                circularQueueElements[head] = null;
+                head = (head + 1) % circularQueueElements.length;
+                item = (request)circularQueueElements[head];
+            }
+        }
+
         circularQueueElements = null;
         mutex = null;
         empty = null;
         full = null;
+        
     }
 
     

@@ -151,6 +151,7 @@ public class MultiThreaded_WebServer{
 	}
 
 	public static void main(String[] args) {
+		
 		try {
 			Paramter_extrator(args);
 
@@ -167,7 +168,7 @@ public class MultiThreaded_WebServer{
 			
 			
             // Create one instance of circularQueue with size using args
-			buffer  = new ThreadSafeCircularQueue<request>(buffer_size, overload_policy);
+			buffer  = new ThreadSafeCircularQueue<request>(buffer_size, overload_policy, s);
 			Mointor = new monitor(pool_size, s, buffer); 
 			Mointor.start();
 
