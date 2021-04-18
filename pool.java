@@ -71,9 +71,10 @@ public class pool {
     public void clean_up(){
         
         for (int i = 0; i < workers.length; i++) {
-            
+
+            workers[i].getState(); 
             workers[i].interrupt(); // signal to thread to cleanup and stop its task
-            workers[i] = null;
+            
         }
         this.workers = null;
         this.s       = null;

@@ -16,17 +16,21 @@ public class worker extends Thread{
 
     public void run(){
         try{
-            while (true) { // might block at get_request() and not teriminte mayby try and catch is better
+            while (!(Thread.currentThread().isInterrupted())) { // might block at get_request() and not teriminte mayby try and catch is better
                 get_request();
                 send_resnpones();
 			}
+            
 		}
         catch(InterruptedException e){
+            
             System.out.println("Worker thorws an exception"+Thread.currentThread().getName());
+            Thread.currentThread().interrupt();
         }
-        
-        System.out.println("Thread "+ Thread.currentThread().getName() + " has been stoped");
-        clean_up();
+        finally{
+            System.out.println("Thread "+ Thread.currentThread().getName() + " has been stoped");
+            clean_up();
+        }
     }
     /**
      * 

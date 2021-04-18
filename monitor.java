@@ -15,7 +15,7 @@
 public class monitor extends Thread{
     private ThreadSafeCircularQueue<request>    buffer;
     private ServeWebRequest                     s;
-    private pool                                pool_of_workers;
+    public pool                                pool_of_workers;
 
     
     // (2) Report any abnormal conditions as they occur in the server,
@@ -28,17 +28,19 @@ public class monitor extends Thread{
         Thread ref_moinitor_Thread = Thread.currentThread();
         Runtime.getRuntime().addShutdownHook(new Thread() {
             public void run() { 
+                ref_moinitor_Thread.interrupt();
                 System.out.println("I will cleanup then terimninate");
                 pool_of_workers.clean_up();
                 buffer.cleanup();
-                clean_up(ref_moinitor_Thread);
+                clean_up();
+                
             }
         });
         // Mintain the Workers 
-        while (!Thread.interrupted()) {//===================================
+        while (!Thread.currentThread().isInterrupted()) {
             pool_of_workers.mintain_threads();
         }
-
+        
     }
     //Create Monitor thread
     public monitor(int npools, ServeWebRequest s, ThreadSafeCircularQueue<request> buffer){
@@ -47,11 +49,11 @@ public class monitor extends Thread{
         pool_of_workers = new pool(npools , this.s, this.buffer);
     }
     // Clean up the Monitor thread
-    public void clean_up(Thread ref_moinitor_Thread){
+    public void clean_up(){
         this.s               = null;
         this.buffer = null;
         this.pool_of_workers = null;
-        ref_moinitor_Thread.interrupt();
+        
     }
 
 }

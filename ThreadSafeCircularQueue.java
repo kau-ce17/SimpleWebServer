@@ -1,5 +1,3 @@
-// https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/util/Queue.html#add(E)
-
 import java.util.concurrent.Semaphore;
  
 /**
@@ -73,7 +71,7 @@ public class ThreadSafeCircularQueue<E> {
             //Drop head policy
             else if(policy.equals("DRPH")){
                 System.out.println("[ Drop Head Policy Activated! ]");
-                E drped_item = this.dropHead(item);
+                E drped_item = dropHead(item);
                 if(drped_item != null){
                     return drped_item;
                 }
@@ -210,22 +208,30 @@ public class ThreadSafeCircularQueue<E> {
     public void cleanup(){
         
         if(head > -1){
+            try{
+            mutex.acquire();
             request item = (request)circularQueueElements[head];
-
             while(item != null){
-                
+                System.out.printf("Refuse the following request number: %d\n",item.get_request_number());
                 s.refuse(item.get_Socket(),item.get_request_number());
 
                 circularQueueElements[head] = null;
                 head = (head + 1) % circularQueueElements.length;
                 item = (request)circularQueueElements[head];
+                
+            }
+            mutex.release();
+            }catch( InterruptedException e){
+                System.out.println("Buffer cleaning is interupted");
             }
         }
-
+        
         circularQueueElements = null;
         mutex = null;
         empty = null;
         full = null;
+
+        System.out.println("Buffer and Semaphore cleaned and terminated");
         
     }
 

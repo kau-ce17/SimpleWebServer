@@ -155,7 +155,7 @@ public class MultiThreaded_WebServer{
 		try {
 			Paramter_extrator(args);
 
-			//Record all the server activity output on a Log File 
+			// //Record all the server activity output on a Log File 
 			PrintStream log_file = new PrintStream(new File("web-server-log.txt")); //===================================
             System.setOut(log_file);  
 			
