@@ -49,18 +49,18 @@ public class MultiThreaded_WebServer{
 		Scanner input = new Scanner(System.in);
 		boolean Start = false;
 		while (!Start){
-			System.out.printf("Port Number: %d\nPool Size: %d\nBuffer Size: %d\nOverlod Policy: %s\n", 
+			System.out.printf("\nPort Number: %d\nPool Size: %d\nBuffer Size: %d\nOverlod Policy: %s\n\n", 
 											PORT,        pool_size,      buffer_size,        overload_policy);
 			System.out.println( "1- Change Port Number\n"    +
 								"2- Change Pool Size\n"      +
 								"3- Change Buffer Size\n"    +
 								"4- Change Overlod Policy\n" +
-								"5- Start Server\n"          +
-								"press a number: "
+								"5- Start Server\n\n"          +
+								"\npress a number: "
 			);
 
-			switch(input.nextInt()) {
-				case 1:
+			switch(input.next()) {
+				case "1":
 					System.out.println("Port Number is: ");
 					try {
 						PORT = input.nextInt();
@@ -69,7 +69,7 @@ public class MultiThreaded_WebServer{
 					}	
 				break;
 
-				case 2:
+				case "2":
 					System.out.println("Pool Size is: ");
 					try {
 						pool_size = input.nextInt();
@@ -78,7 +78,7 @@ public class MultiThreaded_WebServer{
 					}	
 				break;
 
-				case 3:
+				case "3":
 					System.out.println("Buffer Size is: ");
 					try {
 						buffer_size = input.nextInt();
@@ -87,34 +87,37 @@ public class MultiThreaded_WebServer{
 					}				
 				break;
 
-				case 4:
-					System.out.println("1-Block (BLCK)\n"      +
+				case "4":
+					System.out.println("Choose a Policy\n"+
+									   "1-Block (BLCK)\n"      +
 									   "2-Drop_tail (DRPT)\n"  +
-									   "3-Drop_head (DRPH)\n" +
+									   "3-Drop_head (DRPH)\n\n" +
 									   "Pick an option from 1 to 3:"
 									  );
-					switch(input.nextInt()) {
-						case 1:
+					switch(input.next()) {
+						case "1":
 							overload_policy = "BLCK";
 						break;
-						case 2:
+						case "2":
 							overload_policy = "DRPT";
 						break;
-						case 3:
+						case "3":
 							overload_policy = "DRPH";
 						break;
 						default:
-							System.out.println("Wrong Number Nothing Changed!!!");
+							System.out.println("Enter the Right Number, Nothing Changed!!!");
 					}
 				break;
 
-				case 5:
+				case "5":
+					System.out.printf("\nPort Number: %d || Pool Size: %d || Buffer Size: %d || Overlod Policy: %s\n\n", 
+												PORT,        pool_size,      buffer_size,        overload_policy);
 					System.out.println("Server Started......");
 					Start = true;
 				break;
 
 				default:
-					System.out.println("Wrong Number Nothing Changed!!!");
+					System.out.println("Enter the Right Number, Nothing Changed!!!");
 			  }
 		}
 		input.close();
@@ -156,7 +159,7 @@ public class MultiThreaded_WebServer{
 			Paramter_extrator(args);
 
 			// //Record all the server activity output on a Log File 
-			PrintStream log_file = new PrintStream(new File("web-server-log.txt")); //===================================
+			PrintStream log_file = new PrintStream(new File("web-server-log.txt"));
             System.setOut(log_file);  
 			
 			// Create a server listening socket
@@ -199,6 +202,8 @@ public class MultiThreaded_WebServer{
 
 		} catch (IOException e) {
 			System.err.println("Server Connection error : " + e.getMessage());
+		}catch (Exception e) {
+			System.out.print("System Terminated Before Starting ");
 		}
 	}
 }
